@@ -1,0 +1,38 @@
+Bạn thấy như này được không?
+CHƯƠNG 1: TỔNG QUAN VỀ HỆ THỐNG LƯU TRỮ PHÂN TÁN VÀ DỊCH VỤ ĐÁM MÂY
+1.0 Mục tiêu chương
+1.1 Sự phát triển của mô hình lưu trữ
+1.1.1 Lưu trữ tập trung truyền thống
+1.1.2 Sự ra đời tất yếu của lưu trữ phân tán
+1.2 Tổng quan về lưu trữ phân tán
+1.2.1 Khái niệm và đặc điểm
+1.2.2 Kiến trúc cơ bản của một hệ thống lưu trữ phân tán
+1.2.3 Các ưu điểm nổi bật
+1.3 Khái niệm về điện toán đám mây
+1.3.1 Định nghĩa
+1.3.2 Mô hình dịch vụ
+1.3.3 Vai trò của lưu trữ trong kiến trúc đám mây
+1.4 Lưu trữ đối tượng (Object Storage)
+1.4.1 Khái niệm và khác biệt so với Block/File
+1.4.2 Kiến trúc phẳng và vai trò metadata
+1.4.3 Ứng dụng trong dịch vụ đám mây
+1.4.4 Điểm cần lưu ý khi dùng Object Storage
+1.5 Hệ thống lưu trữ phân tán Ceph
+1.5.1 Giới thiệu và kiến trúc tổng quan
+1.5.2 Các thành phần cốt lõi
+1.5.3 Cơ chế hoạt động: CRUSH, replication và phân phối dữ liệu
+1.5.4 Giao diện lưu trữ của Ceph
+1.5.5 Ưu điểm nổi bật của Ceph
+1.6 Nền tảng dịch vụ đám mây Nextcloud
+1.6.1 Giới thiệu Nextcloud
+1.6.2 Các tính năng cốt lõi
+1.6.3 (tùy chọn) Ưu điểm khi tích hợp S3
+1.7 Sự kết hợp giữa Ceph Object Storage và Nextcloud
+1.7.1 Vai trò của Ceph RGW
+1.7.2 Vai trò của Nextcloud
+1.7.3 Ưu điểm của việc kết hợp
+1.7.4 Hạn chế và rủi ro
+1.8 Các xu hướng lưu trữ đám mây hiện nay
+1.9 Tổng kết và hướng phát triển
+1.9.1 Tổng kết nội dung
+1.9.2 Hướng phát triển trong tương lai

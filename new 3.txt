@@ -36,3 +36,271 @@ CHƯƠNG 1: TỔNG QUAN VỀ HỆ THỐNG LƯU TRỮ PHÂN TÁN VÀ DỊCH VỤ 
 1.9 Tổng kết và hướng phát triển
 1.9.1 Tổng kết nội dung
 1.9.2 Hướng phát triển trong tương lai
+
+CHƯƠNG 2: PHÂN TÍCH YÊU CẦU VÀ THIẾT KẾ HỆ THỐNG
+
+CHƯƠNG 2 — PHÂN TÍCH YÊU CẦU VÀ THIẾT KẾ HỆ THỐNG
+
+2.1 Bài toán thực tế và mục tiêu
+2.1.1 Bài toán: Thay thế hệ thống NAS truyền thống
+
+2.1.1.1 Hạn chế của hệ thống NAS hiện tại
+
+2.1.1.2 Nhu cầu lưu trữ và chia sẻ file nội bộ
+
+2.1.1.3 Yêu cầu về khả năng mở rộng và dự phòng
+
+2.1.2 Mục tiêu và phạm vi triển khai
+
+2.1.2.1 Mục tiêu tổng quát
+
+2.1.2.2 Phạm vi triển khai (Nextcloud on-prem + Ceph RGW)
+
+2.1.2.3 Đối tượng sử dụng (phòng ban, admin, power-user)
+
+2.1.3 Giới hạn và ràng buộc
+
+2.1.3.1 Ràng buộc về hạ tầng (ESXi, NIC speed) [TO-UPDATE]
+
+2.1.3.2 Ràng buộc về ngân sách
+
+2.1.3.3 Ràng buộc về thời gian
+
+2.2 Yêu cầu hệ thống
+2.2.1 Yêu cầu chức năng
+
+2.2.1.1 Quản lý người dùng và phân quyền (sysadmin provisioning — NO public self-register)
+
+2.2.1.2 Quản lý file và thư mục (upload/download, resume, multipart)
+
+2.2.1.3 Chia sẻ và cộng tác nội bộ (link/password/expiry, group share)
+
+2.2.1.4 Đồng bộ hóa dữ liệu (desktop/mobile clients; policy: selective/auto)
+
+2.2.1.5 Tìm kiếm và preview (permission-aware)
+
+2.2.1.6 Quản trị hệ thống (dashboard, báo cáo theo phòng ban, audit)
+
+2.2.2 Yêu cầu phi chức năng
+
+2.2.2.1 Hiệu năng (RT UI <2s target; throughput — điều kiện mạng) [TO-UPDATE]
+
+2.2.2.2 Tính sẵn sàng & khả năng chịu lỗi (MON quorum, RGW HA)
+
+2.2.2.3 Khả năng mở rộng (scale-out OSD, scale RGW/Nextcloud)
+
+2.2.2.4 Bảo mật (chỉ truy cập nội bộ domain.example/VLAN/VPN; TLS; cephx; encryption at rest)
+
+2.2.2.5 Giám sát & vận hành (health checks, basic alerts)
+
+2.2.3 Yêu cầu bảo mật (tách rõ để nhấn mạnh)
+
+2.2.3.1 Bảo mật truy cập (network ACLs, internal only)
+
+2.2.3.2 Bảo mật dữ liệu (encryption at rest, TLS)
+
+2.2.3.3 Tuân thủ chính sách nội bộ (retention, logging)
+
+2.3 Thiết kế kiến trúc tổng thể
+2.3.1 Sơ đồ kiến trúc hệ thống (logical diagram: LAN → domain.example → HAProxy VIP → Nextcloud farm ↔ RGW farm → Ceph cluster)
+
+2.3.2 Thiết kế mạng & phân tách lưu lượng
+
+2.3.2.1 Thiết kế VLAN / phân đoạn mạng (Public/Internal/Cluster/Mgmt)
+
+2.3.2.2 Cấu hình bonding & load balancing (LACP, jumbo frames) [TO-UPDATE: NIC capability]
+
+2.3.2.3 Quy hoạch IP & DNS nội bộ (domain.example mapping)
+
+2.3.3 Luồng dữ liệu chính (step sequences)
+
+2.3.3.1 Luồng xác thực người dùng (Nextcloud → DB/LDAP)
+
+2.3.3.2 Luồng upload file (Nextcloud presigned URL → client → RGW → Ceph pool)
+
+2.3.3.3 Luồng download file (client ← RGW)
+
+2.3.3.4 Luồng chia sẻ file (permission check → presigned → access)
+
+2.4 Thiết kế chi tiết Ceph Cluster
+2.4.1 Quy hoạch node & tài nguyên
+
+2.4.1.1 Node MON: số lượng, cấu hình, đặt rải (recommend MON=3)
+
+2.4.1.2 Node OSD: số lượng OSD per host, tổng OSD [TO-UPDATE] — ảnh hưởng PG & perf
+
+2.4.1.3 Node RGW: số RGW instances (min 2) và vị trí (public + mgmt)
+
+2.4.1.4 Node client / service: Nextcloud app servers, MariaDB, Redis, HAProxy
+
+2.4.2 Thiết kế Pool & CRUSH map
+
+2.4.2.1 Thiết kế CRUSH map cho failure domain (host / rack)
+
+2.4.2.2 Cấu hình các pool chính: data (rgw.buckets.data), index, .rgw.root (replica size)
+
+2.4.2.3 Tính toán Placement Groups (PG) — công thức & ví dụ [TO-UPDATE: based on total OSD]
+
+2.4.3 Cấu hình RADOS Gateway (RGW)
+
+2.4.3.1 Cấu hình zone & zonegroup (nếu multi-site; single site: đơn giản)
+
+2.4.3.2 Cấu hình S3 API & SSL/TLS (presigned, multipart, path-style)
+
+2.4.3.3 Cấu hình user, bucket, quota, lifecycle rules (department mapping)
+
+2.4.4 Bảo mật & vận hành Ceph
+
+2.4.4.1 cephx key management, keyring backup
+
+2.4.4.2 TLS/HTTPS termination (HAProxy or RGW)
+
+2.4.4.3 Backup cấu hình (ceph.conf, CRUSH map) & SOP vận hành
+
+2.5 Thiết kế tích hợp Nextcloud
+2.5.1 Kiến trúc tích hợp với Ceph RGW
+
+2.5.1.1 Sơ đồ tương tác Nextcloud ↔ RGW (metadata in DB, object in RGW)
+
+2.5.1.2 Cấu hình Object Storage trong Nextcloud (config.php sample; use_path_style=true)
+
+2.5.2 Thiết kế High Availability (tập trung cần cho demo)
+
+2.5.2.1 HA cho Nextcloud: LB/Nginx + multiple app servers; DB HA optional (MariaDB primary + replica)
+
+2.5.2.2 HA cho RGW: multiple RGW instances + HAProxy (VIP)
+
+2.5.3 Quy trình quản trị người dùng
+
+2.5.3.1 Tạo & quản lý user (sysadmin flow; no self-register)
+
+2.5.3.2 Đồng bộ với LDAP/AD (optional)
+
+2.5.3.3 Phân quyền & quota (map phòng ban → bucket/quota)
+
+2.5.4 Cache & locking
+
+2.5.4.1 Redis for sessions & file locking (configuration notes)
+
+2.6 Kế hoạch triển khai & kiểm thử
+2.6.1 Lộ trình triển khai 9 tuần (tuần 1→9, milestone) [tuổi bản mẫu như bạn đã nêu]
+2.6.2 Kịch bản kiểm thử (functional, perf, stress, resilience)
+2.6.3 Đánh giá rủi ro & mitigation (mạng, SPoF, OSD count, vận hành)
+
+CHƯƠNG 3 — TRIỂN KHAI VÀ CẤU HÌNH HỆ THỐNG (thực thi)
+
+3.1 Chuẩn bị môi trường
+
+3.1.1 Cấu hình hạ tầng ảo hóa (ESXi, vSwitch)
+
+3.1.2 Tạo VM templates (OS, kernel tuning)
+
+3.1.3 Thiết lập network & NTP/DNS
+
+3.2 Triển khai Ceph Cluster
+
+3.2.1 Cài MON/MGR (cephadm/ceph-deploy)
+
+3.2.2 Provision OSDs (disk prep, add to cluster)
+
+3.2.3 CRUSH rules & pools creation (set size, PG calculated)
+
+3.2.4 Validations (ceph -s, osd tree, pg stat)
+
+3.3 Triển khai RADOS Gateway (RGW)
+
+3.3.1 Deploy RGW instances (container/VM)
+
+3.3.2 Configure S3 endpoint, presigned, multipart
+
+3.3.3 Create S3 users & buckets (radosgw-admin)
+
+3.3.4 Configure SSL/TLS (HAProxy termination)
+
+3.4 Deploy Nextcloud stack
+
+3.4.1 Webserver + PHP + Nextcloud install
+
+3.4.2 MariaDB setup (backup schedule)
+
+3.4.3 Redis config (cache/locking)
+
+3.4.4 Integrate objectstore (test upload/download)
+
+3.5 HAProxy & HA setup
+
+3.5.1 HAProxy config (LB rules to Nextcloud & RGW)
+
+3.5.2 Keepalived VIP failover checks
+
+3.6 Tuning & Monitoring (basic)
+
+3.6.1 Ceph tuning hints (OSD, BlueStore settings) [TO-UPDATE for perf after tests]
+
+3.6.2 Nextcloud tuning (PHP-FPM, OPcache)
+
+3.6.3 Monitoring basics: Ceph Dashboard; optionally Prometheus/Grafana (minimal metrics)
+
+3.7 Backup & Recovery playbook (short)
+
+3.7.1 DB backup, config backup, CRUSH map export
+
+3.7.2 RGW bucket lifecycle / multisite note (if needed)
+
+3.8 Acceptance tests (smoke)
+
+3.8.1 Functional smoke list (upload, share, sync, quota)
+
+3.8.2 Health checks & logs locations
+
+CHƯƠNG 4 — KIỂM THỬ, ĐÁNH GIÁ VÀ KẾT LUẬN
+
+4.1 Kế hoạch kiểm thử & công cụ
+
+4.1.1 Mục tiêu kiểm thử (verify NFRs & resilience)
+
+4.1.2 Công cụ: rados bench, s3-tests, rclone, fio, ab/wrk (UI) — list
+
+4.2 Kiểm thử chức năng
+
+4.2.1 Upload/download (small & large, resume)
+
+4.2.2 Share & permission tests
+
+4.2.3 Admin operations (create/delete user, assign quota)
+
+4.3 Kiểm thử hiệu năng
+
+4.3.1 Throughput & IOPS scenarios (test plan, expected targets) [TO-UPDATE]
+
+4.3.2 Concurrency tests (100+ users scenario)
+
+4.3.3 Latency percentiles (p50/p95/p99)
+
+4.4 Kiểm thử chịu lỗi & HA
+
+4.4.1 Simulate OSD failure (remove OSD, measure recovery time)
+
+4.4.2 Simulate RGW failover (kill RGW instance)
+
+4.4.3 Simulate network partition (optional)
+
+4.5 Phân tích kết quả & so sánh
+
+4.5.1 So sánh với yêu cầu (đạt/không đạt)
+
+4.5.2 Nguyên nhân & khuyến nghị tối ưu
+
+4.6 Kết luận & hướng phát triển
+
+4.6.1 Kết luận đồ án
+
+4.6.2 Hạn chế & đóng góp
+
+4.6.3 Hướng phát triển (CephFS+AD, RBD+OpenStack, multisite)
+
+4.7 Phụ lục & tài liệu tham khảo
+
+4.7.1 Lệnh & cấu hình mẫu (appendix)
+
+4.7.2 Tài liệu tham khảo chính
